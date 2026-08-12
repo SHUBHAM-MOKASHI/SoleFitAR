@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoleFit AR - Zero-App WebAR Footwear Try-On & Size Calibration</title>
+  <meta name="description" content="Lightweight WebAR virtual try-on plugin for D2C footwear stores. Scan foot dimensions in real-time and recommend accurate shoe sizes without downloading an app.">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+  
+  <!-- Three.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="navbar">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+        </svg>
+      </div>
+      <span>SoleFit <span style="color: var(--accent-cyan);">AR</span></span>
+    </div>
+
+    <nav class="nav-links">
+      <button class="nav-btn active" data-view="storefront">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+        </svg>
+        Storefront Demo
+      </button>
+      <button class="nav-btn" data-view="portal">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+        </svg>
+        Retailer Widget Embed
+      </button>
+      <button class="nav-btn" data-view="analytics">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+        ROI Analytics
+        <span class="nav-badge">-34% Returns</span>
+      </button>
+    </nav>
+
+    <div class="brand-tag">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+      </svg>
+      No Mobile App Required
+    </div>
+  </header>
+
+  <!-- Main Content Views Container -->
+  <main>
+
+    <!-- VIEW 1: D2C Storefront Product Page Demo -->
+    <section id="storefrontView" class="view-container active">
+      <div class="storefront-header">
+        <div class="store-badge">
+          <span>StrideCraft Footwear D2C Storefront</span>
+        </div>
+        <h1 class="store-title">Virtual Try-On Experience</h1>
+        <p class="store-subtitle">Experience instant real-time 3D shoe fitting and size calibration right inside your browser window.</p>
+      </div>
+
+      <div class="pdp-grid">
+        <!-- 3D Interactive Shoe Preview Visualizer -->
+        <div class="pdp-visualizer">
+          <div class="shoe-canvas-container">
+            <canvas id="pdp3dCanvas"></canvas>
+          </div>
+          <div class="visualizer-overlay-controls">
+            <div class="view-badge">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+              Interactive 360° View
+            </div>
+            <div class="view-controls">
+              <button class="icon-btn" title="Drag to rotate 3D shoe">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product Information & Embedded AR Trigger -->
+        <div class="pdp-info">
+          <div>
+            <div id="pdpCategory" class="product-category">Next-Gen Performance Runner</div>
+            <h2 id="pdpTitle" class="product-name">AeroStride Nitro 3D</h2>
+          </div>
+
+          <div class="product-price-row">
+            <div id="pdpPrice" class="price">$159.00</div>
+            <div id="pdpRating" class="rating">★ 4.9 (142 reviews)</div>
+          </div>
+
+          <p id="pdpDesc" class="product-desc">
+            Engineered for responsive cushioning with carbon-fiber spring plate technology and breathable matrix mesh upper.
+          </p>
+
+          <!-- Color Selector -->
+          <div class="selector-group">
+            <div class="selector-label">
+              <span>Select Colorway</span>
+            </div>
+            <div id="pdpColorOptions" class="color-options"></div>
+          </div>
+
+          <!-- Size Selector -->
+          <div class="selector-group">
+            <div class="selector-label">
+              <span>Select Shoe Size</span>
+              <span style="color: var(--primary); cursor: pointer; font-size: 0.8rem;" onclick="window.SoleFitApp.openARModal()">Find My Size in AR →</span>
+            </div>
+            <div id="pdpSizeOptions" class="size-options"></div>
+          </div>
+
+          <!-- Call To Action & AR Plugin Trigger -->
+          <div class="cta-box">
+            <button class="btn-ar-tryon" onclick="window.SoleFitApp.openARModal()">
+              <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+              </svg>
+              ⚡ Try On in AR (No App Required)
+            </button>
+            
+            <button class="btn-add-cart" onclick="window.SoleFitApp.showToast('Item added to your shopping cart!')">
+              Add to Shopping Cart
+            </button>
+
+            <div class="guarantee-pills">
+              <div class="guarantee-item">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Instant Camera Calibration
+              </div>
+              <div class="guarantee-item">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Zero Returns Guaranteed
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: Retailer Widget Embed Generator & Configurator -->
+    <section id="portalView" class="view-container">
+      <div class="portal-header">
+        <h1 class="store-title">D2C Retailer Plugin Generator</h1>
+        <p class="store-subtitle">Add instant 3D WebAR try-on capabilities to your Shopify, WooCommerce, or custom storefront in under 2 minutes.</p>
+      </div>
+
+      <div class="portal-grid">
+        <!-- Embed Configurator Form -->
+        <div class="embed-builder-card">
+          <h2 class="chart-title">Customize Your Widget</h2>
+          
+          <div class="form-group">
+            <label class="form-label">Store ID / License Key</label>
+            <input type="text" class="form-input" value="STRIDE-9021" onchange="window.WidgetEmbed.updateConfig('storeId', this.value)">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Widget Theme</label>
+            <select class="form-select" onchange="window.WidgetEmbed.updateConfig('theme', this.value)">
+              <option value="dark">Dark Glassmorphic (Recommended)</option>
+              <option value="light">Clean Light Mode</option>
+              <option value="brand">Adaptive Accent Match</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Button Style</label>
+            <select class="form-select" onchange="window.WidgetEmbed.updateConfig('buttonStyle', this.value)">
+              <option value="gradient">Vibrant Gradient Glow</option>
+              <option value="solid">Solid Accent Color</option>
+              <option value="glass">Glassmorphism Transparent</option>
+              <option value="dark">Sleek Dark Matte</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Button Call To Action Text</label>
+            <input type="text" class="form-input" value="⚡ Try On in AR (No App)" onchange="window.WidgetEmbed.updateConfig('buttonText', this.value)">
+          </div>
+
+          <!-- Production Script Output -->
+          <div style="margin-top: 1.5rem;">
+            <label class="form-label">Embed Script Code (Copy & Paste)</label>
+            <div class="code-block">
+              <button class="copy-code-btn" onclick="navigator.clipboard.writeText(document.getElementById('embedCodeOutput').textContent); window.SoleFitApp.showToast('Embed script copied to clipboard!')">Copy Code</button>
+              <pre id="embedCodeOutput"></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Widget Sandbox Preview -->
+        <div class="embed-preview-card">
+          <h2 class="chart-title">Live Storefront Widget Preview</h2>
+          <div class="mock-shop-container">
+            <div class="mock-shop-header">Your Storefront Product Page</div>
+            <p style="font-size: 0.85rem; color: #64748b;">This is how your shoppers will experience the instant WebAR button:</p>
+
+            <div class="mock-widget-preview-area" id="mockWidgetPreview">
+              <!-- Dynamically rendered preview button -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: Retailer ROI Analytics Dashboard -->
+    <section id="analyticsView" class="view-container">
+      <div class="portal-header">
+        <h1 class="store-title">Business Value & Return Reduction Analytics</h1>
+        <p class="store-subtitle">Real-time statistics demonstrating how WebAR virtual try-ons eliminate sizing uncertainty and boost sales conversions.</p>
+      </div>
+
+      <!-- KPI Stat Cards -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-lbl">Product Returns Avoided</div>
+          <div class="stat-val" style="color: var(--accent-emerald);">-34.2%</div>
+          <div class="stat-trend trend-up">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+            Saves ~$18,400 / mo in return logistics
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-lbl">Sales Conversion Lift</div>
+          <div class="stat-val" style="color: var(--primary);">+24.8%</div>
+          <div class="stat-trend trend-down">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+            Higher confidence purchase rate
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-lbl">WebAR Try-On Sessions</div>
+          <div class="stat-val">14,820</div>
+          <div class="stat-trend trend-down">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+            +18% growth this week
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-lbl">Size Fit Accuracy Match</div>
+          <div class="stat-val" style="color: var(--accent-cyan);">97.4%</div>
+          <div class="stat-trend trend-up">
+            Based on 3D foot contour scan ratio
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">Return Rate Reduction Trajectory (Before vs After WebAR)</div>
+          <div id="conversionChartCanvas" class="svg-chart-box"></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">Calibrated Shoe Size Distribution</div>
+          <div id="sizeDistributionCanvas" class="svg-chart-box"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================================================
+       WebAR Live Try-On & Instant Calibration Fullscreen Modal
+       ========================================================================== -->
+  <div id="arModal" class="ar-modal">
+    <div class="ar-modal-header">
+      <div class="ar-status">
+        <div id="arStatusDot" class="pulse-dot"></div>
+        <span id="arStatusText">Initializing WebAR Camera Feed...</span>
+      </div>
+
+      <button id="arCloseBtn" class="ar-close-btn" title="Close WebAR Modal">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="ar-viewport-body">
+      <!-- Live WebAR Viewport -->
+      <div class="ar-camera-container">
+        <!-- Live Camera Stream -->
+        <video id="arVideoFeed" playsinline autoplay muted></video>
+
+        <!-- Three.js 3D Shoe Render Canvas -->
+        <canvas id="arThreeCanvas"></canvas>
+
+        <!-- Computer Vision Tracking Bounding Box Canvas -->
+        <canvas id="arCanvasOverlay"></canvas>
+
+        <!-- Target Foot Alignment Frame -->
+        <div id="footGuide" class="foot-target-guide locked">
+          <div class="guide-text">Align Foot Inside Frame for Live Scan</div>
+        </div>
+
+        <!-- Floating Camera Controls Overlay -->
+        <div class="ar-floating-controls">
+          <button id="toggleDemoBtn" class="ar-control-btn">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            Switch Camera / Toggle Simulation
+          </button>
+        </div>
+      </div>
+
+      <!-- Side Panel: Live Calibrated Size & 3D Fit Heatmap -->
+      <div class="ar-side-panel">
+        <div class="panel-section-title">
+          <span>Size Calibration Result</span>
+          <span style="font-size: 0.75rem; color: var(--accent-emerald); font-weight: 700;">● Live Scan</span>
+        </div>
+
+        <!-- Recommended Size Card -->
+        <div class="calibration-card">
+          <div class="rec-size-badge">
+            <div id="arRecSize" class="rec-size-num">US 9.0</div>
+            <div id="arEuSize" class="rec-size-label">EU 42.5 / UK 8.0</div>
+          </div>
+
+          <div class="fit-metrics-grid">
+            <div class="metric-box">
+              <div class="metric-lbl">Foot Length</div>
+              <div id="arFootLength" class="metric-val">26.8 cm</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-lbl">Foot Width</div>
+              <div id="arFootWidth" class="metric-val">9.8 cm</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-lbl">Width Profile</div>
+              <div id="arWidthProfile" class="metric-val">Standard</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-lbl">Fit Match Score</div>
+              <div id="arFitConfidence" class="metric-val" style="color: var(--accent-emerald);">97%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3D Tension Heatmap -->
+        <div class="panel-section-title">
+          <span>3D Fit Pressure Heatmap</span>
+        </div>
+
+        <div class="calibration-card">
+          <div class="heatmap-meters">
+            <div class="meter-row">
+              <div class="meter-label-group">
+                <span>Toe Box Clearance</span>
+                <span style="color: var(--accent-emerald); font-weight: 700;">Optimal (85%)</span>
+              </div>
+              <div class="meter-bar-track">
+                <div id="heatToeFill" class="meter-bar-fill meter-green" style="width: 85%;"></div>
+              </div>
+            </div>
+
+            <div class="meter-row">
+              <div class="meter-label-group">
+                <span>Instep / Arch Tension</span>
+                <span style="color: var(--accent-cyan); font-weight: 700;">Ideal Fit (92%)</span>
+              </div>
+              <div class="meter-bar-track">
+                <div id="heatInstepFill" class="meter-bar-fill meter-cyan" style="width: 92%;"></div>
+              </div>
+            </div>
+
+            <div class="meter-row">
+              <div class="meter-label-group">
+                <span>Heel Counter Grip</span>
+                <span style="color: var(--accent-emerald); font-weight: 700;">Secure (96%)</span>
+              </div>
+              <div class="meter-bar-track">
+                <div id="heatHeelFill" class="meter-bar-fill meter-green" style="width: 96%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Apply Calibrated Size Button -->
+        <button id="arApplySizeBtn" class="btn-ar-tryon" style="width: 100%; margin-top: auto;">
+          Apply Size & Select Shoe
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Application Scripts -->
+  <script src="js/store-catalog.js"></script>
+  <script src="js/ar-engine.js"></script>
+  <script src="js/size-calibrator.js"></script>
+  <script src="js/widget-embed.js"></script>
+  <script src="js/analytics.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
